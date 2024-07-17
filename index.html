@@ -28,12 +28,16 @@
             this.handleScale = this.handleScale.bind(this);
             this.handleRotation = this.handleRotation.bind(this);
             this.isVisible = false;
-            this.el.addEventListener('markerFound', (e) => {
-              this.isVisible = true;
-              document.querySelector('#ar-image').setAttribute('visible', true);
+            this.el.sceneEl.addEventListener('markerFound', (e) => {
+              if (e.target === this.el) {
+                this.isVisible = true;
+                document.querySelector('#ar-image').setAttribute('visible', true);
+              }
             });
-            this.el.addEventListener('markerLost', (e) => {
-              this.isVisible = false;
+            this.el.sceneEl.addEventListener('markerLost', (e) => {
+              if (e.target === this.el) {
+                this.isVisible = false;
+              }
             });
           },
           update: function () {
