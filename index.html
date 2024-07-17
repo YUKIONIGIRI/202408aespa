@@ -11,7 +11,7 @@
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
         <a-marker type='pattern' url='marker.patt' emitevents='true'>
             <a-entity id='marker-root' position='0 0 0'>
-                <a-image id='ar-image' src='image.png' position='0 0.5 0' rotation='0 0 0' scale='1 1 1' gesture-handler></a-image>
+                <a-image id='ar-image' src='image.png' position='0 0 0' rotation='0 0 0' scale='2 2 2' gesture-handler></a-image>
             </a-entity>
         </a-marker>
         <a-entity camera></a-entity>
@@ -22,8 +22,8 @@
             schema: {
                 enabled: { default: true },
                 rotationFactor: { default: 5 },
-                minScale: { default: 0.3 },
-                maxScale: { default: 8 },
+                minScale: { default: 1 },
+                maxScale: { default: 5 },
             },
             init: function () {
                 this.handleScale = this.handleScale.bind(this);
