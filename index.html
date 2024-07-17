@@ -5,82 +5,83 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.rawgit.com/ngokevin/kframe/master/components/gesture-handler/dist/gesture-handler.min.js"></script>
 </head>
 <body style='margin: 0; overflow: hidden;'>
     <a-scene embedded arjs>
         <a-marker preset='custom' type='pattern' url='marker.patt'>
-            <a-image src='image.png' position='0 0 0' rotation='0 0 0' scale='1 1 1'
-                     gesture-handler></a-image>
+            <a-image src='image.png' position='0 0 0' rotation='0 0 0' scale='1 1 1' gesture-handler></a-image>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
         AFRAME.registerComponent('gesture-handler', {
-            schema: {
-                enabled: {default: true},
-                rotationFactor: {default: 5},
-                minScale: {default: 0.3},
-                maxScale: {default: 8},
-            },
-            init: function () {
-                this.handleScale = this.handleScale.bind(this);
-                this.handleRotation = this.handleRotation.bind(this);
-                this.isVisible = false;
-                this.el.addEventListener('markerFound', (e) => {
-                    this.isVisible = true;
-                });
-                this.el.addEventListener('markerLost', (e) => {
-                    this.isVisible = false;
-                });
-            },
-            update: function () {
-                if (this.data.enabled) {
-                    this.addEventListeners();
-                } else {
-                    this.removeEventListeners();
-                }
-            },
-            remove: function () {
-                this.removeEventListeners();
-            },
-            tick: function () {},
-            addEventListeners: function () {
-                this.el.sceneEl.canvas.addEventListener('touchmove', this.handleScale);
-                this.el.sceneEl.canvas.addEventListener('touchmove', this.handleRotation);
-            },
-            removeEventListeners: function () {
-                this.el.sceneEl.canvas.removeEventListener('touchmove', this.handleScale);
-                this.el.sceneEl.canvas.removeEventListener('touchmove', this.handleRotation);
-            },
-            handleScale: function (event) {
-                if (this.isVisible && event.touches.length === 2) {
-                    let touch1 = event.touches[0];
-                    let touch2 = event.touches[1];
-                    let distance = Math.sqrt(Math.pow(touch1.pageX - touch2.pageX, 2) + Math.pow(touch1.pageY - touch2.pageY, 2));
-                    if (!this.initialDistance) {
-                        this.initialDistance = distance;
-                    } else {
-                        let scaleFactor = distance / this.initialDistance;
-                        scaleFactor = Math.min(Math.max(scaleFactor, this.data.minScale), this.data.maxScale);
-                        this.el.object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                    }
-                }
-            },
-            handleRotation: function (event) {
-                if (this.isVisible && event.touches.length === 1) {
-                    let touch = event.touches[0];
-                    if (!this.initialTouch) {
-                        this.initialTouch = touch;
-                    } else {
-                        let deltaX = touch.pageX - this.initialTouch.pageX;
-                        let deltaY = touch.pageY - this.initialTouch.pageY;
-                        this.el.object3D.rotation.y += deltaX * this.data.rotationFactor / 1000;
-                        this.el.object3D.rotation.x -= deltaY * this.data.rotationFactor / 1000;
-                        this.initialTouch = touch;
-                    }
-                }
-            },
+          schema: {
+            enabled: { default: true },
+            rotationFactor: { default: 5 },
+            minScale: { default: 0.3 },
+            maxScale: { default: 8 },
+          },
+          init: function () {
+            this.handleScale = this.handleScale.bind(this);
+            this.handleRotation = this.handleRotation.bind(this);
+            this.isVisible = false;
+            this.el.addEventListener('markerFound', (e) => {
+              this.isVisible = true;
+            });
+            this.el.addEventListener('markerLost', (e) => {
+              this.isVisible = false;
+            });
+          },
+          update: function () {
+            if (this.data.enabled) {
+              this.addEventListeners();
+            } else {
+              this.removeEventListeners();
+            }
+          },
+          remove: function () {
+            this.removeEventListeners();
+          },
+          tick: function () {},
+          addEventListeners: function () {
+            this.el.sceneEl.canvas.addEventListener('touchmove', this.handleScale);
+            this.el.sceneEl.canvas.addEventListener('touchmove', this.handleRotation);
+          },
+          removeEventListeners: function () {
+            this.el.sceneEl.canvas.removeEventListener('touchmove', this.handleScale);
+            this.el.sceneEl.canvas.removeEventListener('touchmove', this.handleRotation);
+          },
+          handleScale: function (event) {
+            if (this.isVisible && event.touches.length === 2) {
+              let touch1 = event.touches[0];
+              let touch2 = event.touches[1];
+              let distance = Math.sqrt(Math.pow(touch1.pageX - touch2.pageX, 2) + Math.pow(touch1.pageY - touch2.pageY, 2));
+              if (!this.initialDistance) {
+                this.initialDistance = distance;
+              } else {
+                let scaleFactor = distance / this.initialDistance;
+                scaleFactor = Math.min(Math.max(scaleFactor, this.data.minScale), this.data.maxScale);
+                this.el.object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
+              }
+            }
+          },
+          handleRotation: function (event) {
+            if (this.isVisible && event.touches.length === 1) {
+              let touch = event.touches[0];
+              if (!this.initialTouch) {
+                this.initialTouch = touch;
+              } else {
+                let deltaX = touch.pageX - this.initialTouch.pageX;
+                let deltaY = touch.pageY - this.initialTouch.pageY;
+                this.el.object3D.rotation.y += deltaX * this.data.rotationFactor / 1000;
+                this.el.object3D.rotation.x -= deltaY * this.data.rotationFactor / 1000;
+                this.initialTouch = touch;
+              }
+            }
+          },
         });
     </script>
 </body>
