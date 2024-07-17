@@ -11,10 +11,10 @@
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
         <a-marker type='pattern' url='marker.patt' emitevents='true'>
             <a-entity id='marker-root'>
-                <a-image id='ar-image' src='image.png' position='0 0 0.5' rotation='-90 0 0' scale='3 3 3' gesture-handler></a-image>
+                <a-image id='ar-image' src='image.png' position='0 0 0.5' rotation='0 0 0' scale='3 3 3' gesture-handler></a-image>
             </a-entity>
         </a-marker>
-        <a-entity camera></a-entity>
+        <a-entity camera position="0 1.6 0"></a-entity>
     </a-scene>
 
     <script>
@@ -93,11 +93,14 @@
             init: function () {
                 const marker = this.el;
                 const arImage = document.querySelector('#ar-image');
+                const camera = document.querySelector('[camera]');
                 marker.addEventListener('markerFound', () => {
                     // マーカーが見つかったときに実行する処理
                     arImage.object3D.visible = true;
-                    arImage.object3D.position.copy(marker.object3D.position);
-                    arImage.object3D.rotation.copy(marker.object3D.rotation);
+                    const cameraPosition = camera.object3D.position;
+                    const cameraRotation = camera.object3D.rotation;
+                    arImage.object3D.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z - 1);
+                    arImage.object3D.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
                 });
                 marker.addEventListener('markerLost', () => {
                     // マーカーが見失われたときに実行する処理
