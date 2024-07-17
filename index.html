@@ -10,9 +10,7 @@
 <body style='margin: 0; overflow: hidden;'>
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
         <a-marker type='pattern' url='marker.patt' emitevents='true'>
-            <a-entity id='marker-root' position='0 0 0'>
-                <a-image id='ar-image' src='image.png' position='0 0 0' rotation='0 0 0' scale='2 2 2' gesture-handler></a-image>
-            </a-entity>
+            <a-image id='ar-image' src='image.png' position='0 0.5 0' rotation='0 0 0' scale='1 1 1' gesture-handler></a-image>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
@@ -92,16 +90,16 @@
         AFRAME.registerComponent('markerhandler', {
             init: function () {
                 const marker = this.el;
-                const markerRoot = document.querySelector('#marker-root');
+                const arImage = document.querySelector('#ar-image');
                 marker.addEventListener('markerFound', () => {
                     // マーカーが見つかったときに実行する処理
-                    markerRoot.object3D.position.copy(marker.object3D.position);
-                    markerRoot.object3D.rotation.copy(marker.object3D.rotation);
-                    markerRoot.setAttribute('visible', true);
+                    arImage.object3D.visible = true;
+                    arImage.object3D.position.copy(marker.object3D.position);
+                    arImage.object3D.rotation.copy(marker.object3D.rotation);
                 });
                 marker.addEventListener('markerLost', () => {
                     // マーカーが見失われたときに実行する処理
-                    markerRoot.setAttribute('visible', true);
+                    arImage.object3D.visible = true; // 画像を表示したままにする
                 });
             }
         });
