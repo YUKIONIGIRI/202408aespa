@@ -4,13 +4,14 @@
     <title>AR with Marker</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.rawgit.com/ngokevin/kframe/master/components/gesture-detector/dist/gesture-detector.min.js"></script>
 </head>
 <body style='margin: 0; overflow: hidden;'>
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
         <a-marker type='pattern' url='marker.patt' emitevents='true'>
-            <a-image id='ar-image' src='image.png' position='0 0 0.5' rotation='-90 0 0' scale='3 3 3' gesture-handler></a-image>
+            <a-entity id='marker-root' rotation='-90 0 0'>
+                <a-image id='ar-image' src='image.png' position='0 0 0.5' scale='2 2 2' gesture-detector></a-image>
+            </a-entity>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
@@ -21,11 +22,9 @@
                 enabled: { default: true },
                 rotationFactor: { default: 5 },
                 minScale: { default: 0.5 },
-                maxScale: { default: 3 },
+                maxScale: { default: 5 },
             },
             init: function () {
-                this.handleScale = this.handleScale.bind(this);
-                this.handleRotation = this.handleRotation.bind(this);
                 this.initialDistance = null;
                 this.initialScale = null;
                 this.initialRotation = null;
@@ -36,51 +35,37 @@
                 this.el.sceneEl.addEventListener('markerLost', () => {
                     this.isVisible = false;
                 });
+                this.el.sceneEl.addEventListener('gesture-detected', this.handleGesture.bind(this));
             },
-            update: function () {
-                if (this.data.enabled) {
-                    this.addEventListeners();
-                } else {
-                    this.removeEventListeners();
-                }
-            },
-            remove: function () {
-                this.removeEventListeners();
-            },
-            addEventListeners: function () {
-                this.el.sceneEl.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
-                this.el.sceneEl.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
-            },
-            removeEventListeners: function () {
-                this.el.sceneEl.canvas.removeEventListener('touchstart', this.handleTouchStart.bind(this));
-                this.el.sceneEl.canvas.removeEventListener('touchmove', this.handleTouchMove.bind(this));
-            },
-            handleTouchStart: function (event) {
-                if (event.touches.length === 2) {
-                    this.initialDistance = this.getDistance(event.touches[0], event.touches[1]);
-                    this.initialScale = this.el.object3D.scale.x;
-                } else if (event.touches.length === 1) {
-                    this.initialRotation = this.el.object3D.rotation.clone();
-                    this.initialTouch = event.touches[0];
-                }
-            },
-            handleTouchMove: function (event) {
+            handleGesture: function (event) {
                 if (!this.isVisible) return;
-                if (event.touches.length === 2 && this.initialDistance) {
-                    let currentDistance = this.getDistance(event.touches[0], event.touches[1]);
-                    let scaleFactor = currentDistance / this.initialDistance;
+
+                if (event.detail.type === 'pinch') {
+                    if (!this.initialScale) {
+                        this.initialScale = this.el.object3D.scale.x;
+                    }
+                    const scaleFactor = event.detail.scale;
                     let newScale = this.initialScale * scaleFactor;
                     newScale = Math.min(Math.max(newScale, this.data.minScale), this.data.maxScale);
                     this.el.object3D.scale.set(newScale, newScale, newScale);
-                } else if (event.touches.length === 1 && this.initialTouch) {
-                    let deltaX = event.touches[0].pageX - this.initialTouch.pageX;
-                    let deltaY = event.touches[0].pageY - this.initialTouch.pageY;
-                    this.el.object3D.rotation.y = this.initialRotation.y + deltaX * this.data.rotationFactor / 1000;
-                    this.el.object3D.rotation.x = this.initialRotation.x - deltaY * this.data.rotationFactor / 1000;
                 }
-            },
-            getDistance: function (touch1, touch2) {
-                return Math.sqrt(Math.pow(touch1.pageX - touch2.pageX, 2) + Math.pow(touch1.pageY - touch2.pageY, 2));
+
+                if (event.detail.type === 'rotate') {
+                    if (!this.initialRotation) {
+                        this.initialRotation = this.el.object3D.rotation.clone();
+                    }
+                    const deltaRotation = event.detail.rotation;
+                    this.el.object3D.rotation.y = this.initialRotation.y + deltaRotation * this.data.rotationFactor / 1000;
+                }
+
+                if (event.detail.type === 'drag') {
+                    if (this.initialRotation) {
+                        const deltaX = event.detail.deltaX;
+                        const deltaY = event.detail.deltaY;
+                        this.el.object3D.rotation.y = this.initialRotation.y + deltaX * this.data.rotationFactor / 1000;
+                        this.el.object3D.rotation.x = this.initialRotation.x - deltaY * this.data.rotationFactor / 1000;
+                    }
+                }
             }
         });
 
@@ -98,6 +83,7 @@
         });
 
         document.querySelector('a-marker').setAttribute('markerhandler', '');
+        document.querySelector('#ar-image').setAttribute('gesture-handler', '');
     </script>
 </body>
 </html>
